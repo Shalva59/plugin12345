@@ -30,11 +30,11 @@ export default function Navigation() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      className={`fixed top-0 left-0 right-0 z-50 w-full max-w-full transition-all duration-500 ${
         isScrolled ? "glass-card border-b border-cyan-400/20 shadow-lg shadow-cyan-500/5" : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 max-w-full">
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="text-2xl font-bold text-gradient hover:scale-105 transition-transform duration-300">
             PLUG-IN
@@ -68,7 +68,7 @@ export default function Navigation() {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="md:hidden glass-card border-t border-cyan-400/20 py-4 animate-slide-up">
+          <div className="md:hidden glass-card border-t border-cyan-400/20 py-4 animate-slide-up max-w-full">
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => (
                 <Link

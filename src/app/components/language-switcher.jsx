@@ -42,7 +42,7 @@ export default function LanguageSwitcher() {
       </button>
 
       <div
-        className={`absolute top-full left-0 right-0 md:left-0 md:right-auto lg:left-auto lg:right-0 mt-2 glass-card border border-cyan-400/30 rounded-lg overflow-hidden transition-all duration-300 z-50 ${
+        className={`absolute top-full left-0 right-0 md:left-auto md:right-0 lg:left-auto lg:right-0 mt-2 glass-card border border-cyan-400/30 rounded-lg overflow-hidden transition-all duration-300 z-50 min-w-[120px] ${
           isOpen ? "opacity-100 visible" : "opacity-0 invisible"
         }`}
       >

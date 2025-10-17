@@ -41,25 +41,24 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-black overflow-hidden">
-      {/* <Navigation /> */}
+    <div className="min-h-screen bg-black overflow-x-hidden max-w-full">
 
-      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6">
+      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 overflow-hidden">
         {/* Animated gradient orbs */}
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
-            className="absolute w-[400px] sm:w-[600px] md:w-[800px] h-[400px] sm:h-[600px] md:h-[800px] rounded-full bg-cyan-500/20 blur-[120px] animate-pulse"
+            className="absolute w-[300px] sm:w-[500px] md:w-[700px] h-[300px] sm:h-[500px] md:h-[700px] rounded-full bg-cyan-500/20 blur-[120px] animate-pulse"
             style={{
-              top: `${mousePosition.y / 20}px`,
-              left: `${mousePosition.x / 20}px`,
+              top: `${Math.min(Math.max(mousePosition.y / 20, 0), 100)}px`,
+              left: `${Math.min(Math.max(mousePosition.x / 20, 0), 100)}px`,
               transition: "all 0.3s ease-out",
             }}
           />
-          <div className="absolute w-[300px] sm:w-[500px] md:w-[600px] h-[300px] sm:h-[500px] md:h-[600px] rounded-full bg-emerald-500/15 blur-[100px] top-1/3 right-1/4 animate-float" />
-          <div className="absolute w-[250px] sm:w-[400px] md:w-[500px] h-[250px] sm:h-[400px] md:h-[500px] rounded-full bg-purple-500/10 blur-[90px] bottom-1/4 left-1/3 glow-orb" />
+          <div className="absolute w-[250px] sm:w-[400px] md:w-[500px] h-[250px] sm:h-[400px] md:h-[500px] rounded-full bg-emerald-500/15 blur-[100px] top-1/3 right-0 animate-float" />
+          <div className="absolute w-[200px] sm:w-[350px] md:w-[450px] h-[200px] sm:h-[350px] md:h-[450px] rounded-full bg-purple-500/10 blur-[90px] bottom-1/4 left-0 glow-orb" />
         </div>
 
-        <div className="container mx-auto px-4 pt-20 relative z-10">
+        <div className="container mx-auto px-4 pt-20 relative z-10 max-w-full">
           <div className="max-w-6xl mx-auto text-center">
             {/* Badge with animation */}
             <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full glass-card mb-6 sm:mb-8 animate-fade-in border border-cyan-400/30 hover:border-cyan-400/60 transition-all duration-300">
@@ -260,7 +259,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* <Footer /> */}
+      <Footer />
     </div>
   )
 }

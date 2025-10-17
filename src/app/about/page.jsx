@@ -61,7 +61,6 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <Navigation />
 
       {/* Hero Section */}
       <section className="pt-32 pb-16 px-4">
