@@ -1,18 +1,18 @@
 "use client"
-
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ArrowRight, Code, Headphones, Download, Sparkles, Zap, Shield, Rocket } from "lucide-react"
 import { Button } from "../app/components/ui/button"
-import Navigation from "../app/components/navigation"
-import Footer from "../app/components/footer"
 import { useLanguage } from "../../lib/language-context"
 
 export default function HomePage() {
   const { t } = useLanguage()
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+
     const handleMouseMove = (e) => {
       setMousePosition({ x: e.clientX, y: e.clientY })
     }
@@ -24,6 +24,8 @@ export default function HomePage() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("animate-slide-up")
+            entry.target.classList.remove("opacity-0")
+            observer.unobserve(entry.target)
           }
         })
       },
@@ -41,26 +43,27 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-black overflow-hidden">
-      {/* <Navigation /> */}
-
-      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6">
+    <div className="min-h-screen bg-black overflow-x-clip w-full max-w-full">
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 overflow-x-clip w-full max-w-full">
         {/* Animated gradient orbs */}
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none w-full max-w-full">
           <div
-            className="absolute w-[400px] sm:w-[600px] md:w-[800px] h-[400px] sm:h-[600px] md:h-[800px] rounded-full bg-cyan-500/20 blur-[120px] animate-pulse"
+            className="absolute w-[150px] sm:w-[400px] md:w-[600px] h-[150px] sm:h-[400px] md:h-[600px] rounded-full bg-cyan-500/20 blur-[80px] sm:blur-[120px] animate-pulse"
             style={{
-              top: `${mousePosition.y / 20}px`,
-              left: `${mousePosition.x / 20}px`,
+              top: mounted && window.innerWidth >= 640 ? `${Math.min(Math.max(mousePosition.y / 20, 0), 50)}px` : "20%",
+              left:
+                mounted && window.innerWidth >= 640 ? `${Math.min(Math.max(mousePosition.x / 20, 0), 50)}px` : "10%",
               transition: "all 0.3s ease-out",
             }}
           />
-          <div className="absolute w-[300px] sm:w-[500px] md:w-[600px] h-[300px] sm:h-[500px] md:h-[600px] rounded-full bg-emerald-500/15 blur-[100px] top-1/3 right-1/4 animate-float" />
-          <div className="absolute w-[250px] sm:w-[400px] md:w-[500px] h-[250px] sm:h-[400px] md:h-[500px] rounded-full bg-purple-500/10 blur-[90px] bottom-1/4 left-1/3 glow-orb" />
+          <div className="absolute w-[120px] sm:w-[350px] md:w-[450px] h-[120px] sm:h-[350px] md:h-[450px] rounded-full bg-emerald-500/15 blur-[70px] sm:blur-[100px] top-1/3 right-[5%] animate-float" />
+          <div className="absolute w-[100px] sm:w-[300px] md:w-[400px] h-[100px] sm:h-[300px] md:h-[400px] rounded-full bg-purple-500/10 blur-[60px] sm:blur-[90px] bottom-1/4 left-[5%] glow-orb" />
         </div>
 
-        <div className="container mx-auto px-4 pt-20 relative z-10">
-          <div className="max-w-6xl mx-auto text-center">
+        {/* Main Content */}
+        <div className="mx-auto px-4 pt-20 relative z-10 w-full max-w-full">
+          <div className="max-w-6xl mx-auto text-center w-full">
             {/* Badge with animation */}
             <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full glass-card mb-6 sm:mb-8 animate-fade-in border border-cyan-400/30 hover:border-cyan-400/60 transition-all duration-300">
               <Sparkles size={16} className="text-cyan-400 animate-pulse sm:w-[18px] sm:h-[18px]" />
@@ -109,8 +112,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-16 sm:py-20 md:py-24 lg:py-32 relative">
-        <div className="container mx-auto px-4">
+      {/* Our Services Section */}
+      <section className="py-16 sm:py-20 md:py-24 lg:py-32 relative overflow-x-clip w-full max-w-full">
+        <div className="mx-auto px-4 w-full max-w-full">
           <div className="text-center mb-12 sm:mb-16 animate-on-scroll opacity-0">
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 px-4">
               {t.home.ourServices}
@@ -187,10 +191,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-16 sm:py-20 md:py-24 lg:py-32 relative">
+      {/* Statistics Section */}
+      <section className="py-16 sm:py-20 md:py-24 lg:py-32 relative overflow-x-clip w-full max-w-full">
         <div className="absolute inset-0 glow-orb w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-purple-500/10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
 
-        <div className="container mx-auto px-4 relative">
+        <div className="mx-auto px-4 relative w-full max-w-full">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
             {[
               { number: "500+", label: t.home.completedProjects, icon: Rocket },
@@ -218,8 +223,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="py-16 sm:py-20 md:py-24 lg:py-32 relative">
-        <div className="container mx-auto px-4">
+      {/* Ready to Start Section */}
+      <section className="py-16 sm:py-20 md:py-24 lg:py-32 relative overflow-x-clip w-full max-w-full">
+        <div className="mx-auto px-4 w-full max-w-full">
           <div className="max-w-5xl mx-auto text-center animate-on-scroll opacity-0">
             <div className="relative">
               {/* Background glow */}
@@ -259,8 +265,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* <Footer /> */}
     </div>
   )
 }
