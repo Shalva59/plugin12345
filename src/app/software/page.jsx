@@ -1,8 +1,5 @@
 "use client"
-
 import { useLanguage } from "../../../lib/language-context"
-import Navigation from "../components/navigation"
-import Footer from "../components/footer"
 import { Button } from "../components/ui/button"
 import Link from "next/link"
 
@@ -48,20 +45,18 @@ export default function SoftwarePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* <Navigation /> */}
-
+    <div className="min-h-screen bg-black text-white overflow-x-clip w-full max-w-full">
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
+      <section className="relative pt-32 pb-20 overflow-hidden w-full max-w-full">
         {/* Animated gradient orbs */}
         <div className="absolute top-20 left-10 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
 
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="mx-auto px-4 relative z-10 max-w-7xl w-full">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 break-words text-balance">
               <span className="text-white">{t.software.title} </span>
-              <span className="bg-gradient-to-r from-cyan-400 via-emerald-400 to-purple-400 text-transparent bg-clip-text">
+              <span className="bg-gradient-to-r from-cyan-400 via-emerald-400 to-purple-400 text-transparent bg-clip-text break-words">
                 {t.software.titleGradient}
               </span>
             </h1>
@@ -71,15 +66,15 @@ export default function SoftwarePage() {
       </section>
 
       {/* Software Categories */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
+      <section className="py-20 w-full max-w-full overflow-x-clip">
+        <div className="mx-auto px-4 max-w-7xl w-full">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {softwareCategories.map((category) => {
               const categoryData = t.software.categories[category.id]
               return (
                 <div
                   key={category.id}
-                  className={`glass-card border flex flex-col justify-between ${category.borderColor} p-8 hover:scale-105 transition-all duration-300 ${category.hoverGlow} hover:shadow-2xl group`}
+                  className={`glass-card border ${category.borderColor} p-8 hover:scale-105 transition-all duration-300 ${category.hoverGlow} hover:shadow-2xl group`}
                 >
                   <div className="flex items-start gap-4 mb-6">
                     <div
@@ -133,8 +128,8 @@ export default function SoftwarePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
+      <section className="py-20 w-full max-w-full overflow-x-clip">
+        <div className="mx-auto px-4 max-w-7xl w-full">
           <div className="glass-card border border-cyan-400/20 p-12 text-center max-w-4xl mx-auto">
             <h2 className="text-4xl font-bold text-white mb-4">{t.software.cta.title}</h2>
             <p className="text-xl text-gray-400 mb-8">{t.software.cta.description}</p>
@@ -149,8 +144,6 @@ export default function SoftwarePage() {
           </div>
         </div>
       </section>
-
-      {/* <Footer /> */}
     </div>
   )
 }
