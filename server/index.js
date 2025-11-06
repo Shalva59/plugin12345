@@ -10,6 +10,7 @@ const path = require('path');
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const contactRoutes = require('./routes/contact');
 
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '..', '.env.local') });
@@ -56,6 +57,7 @@ app.use('/api', limiter);
 
 // Routes
 app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

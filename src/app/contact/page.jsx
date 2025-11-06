@@ -1,15 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 // import Navigation from "@/app/components/navigation"
 // import Footer from "@/app/components/footer"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { useLanguage } from "../../../lib/language-context"
+import { useAuth } from "../../../lib/auth-context"
+import { contactAPI } from "../../../lib/api"
 
 export default function ContactPage() {
   const { t } = useLanguage()
+  const { user, isAuthenticated } = useAuth()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -17,14 +20,45 @@ export default function ContactPage() {
     message: "",
   })
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  const handleSubmit = (e) => {
+  // Auto-fill name and email if user is logged in
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || "",
+        email: user.email || "",
+      }))
+    }
+  }, [isAuthenticated, user])
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitted(true)
-    setTimeout(() => {
-      setSubmitted(false)
-      setFormData({ name: "", email: "", subject: "", message: "" })
-    }, 3000)
+    setLoading(true)
+    setError("")
+
+    try {
+      const response = await contactAPI.sendContact(formData)
+
+      if (response.success) {
+        setSubmitted(true)
+        setTimeout(() => {
+          setSubmitted(false)
+          // Only clear subject and message, keep name and email if logged in
+          setFormData(prev => ({
+            ...prev,
+            subject: "",
+            message: "",
+          }))
+        }, 3000)
+      }
+    } catch (err) {
+      setError(err.message || "Failed to send message. Please try again.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleChange = (e) => {
@@ -64,6 +98,16 @@ export default function ContactPage() {
                   <h3 className="text-xl font-semibold text-white mb-2">{t.contact.successTitle}</h3>
                   <p className="text-gray-400">{t.contact.successMessage}</p>
                 </div>
+              ) : error ? (
+                <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-6 mb-4">
+                  <p className="text-red-400">{error}</p>
+                  <Button
+                    onClick={() => setError("")}
+                    className="mt-4 bg-red-500 hover:bg-red-600"
+                  >
+                    Try Again
+                  </Button>
+                </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
@@ -77,7 +121,8 @@ export default function ContactPage() {
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      className="bg-black/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-cyan-500"
+                      disabled={isAuthenticated}
+                      className="bg-black/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed"
                       placeholder={t.contact.namePlaceholder}
                     />
                   </div>
@@ -93,7 +138,8 @@ export default function ContactPage() {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="bg-black/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-cyan-500"
+                      disabled={isAuthenticated}
+                      className="bg-black/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed"
                       placeholder={t.contact.emailPlaceholder}
                     />
                   </div>
@@ -132,9 +178,10 @@ export default function ContactPage() {
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-6 text-lg transition-all duration-300"
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-6 text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {t.contact.sendButton}
+                    {loading ? "Sending..." : t.contact.sendButton}
                   </Button>
                 </form>
               )}
