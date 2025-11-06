@@ -1,21 +1,41 @@
-const nodemailer = require('nodemailer');
+  const nodemailer = require('nodemailer');
+  console.log('Nodemailer version check:', typeof nodemailer.createTransporter); // Debug line
 
-// Create reusable transporter object using Gmail SMTP
-const createTransporter = () => {
-  return nodemailer.createTransporter({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // false for port 587, true for 465
-    auth: {
-      user: process.env.EMAIL_USER || 'pluginappgeo@gmail.com',
-      pass: process.env.EMAIL_PASS || ''
-    },
-    tls: {
-      ciphers: 'SSLv3',
-      rejectUnauthorized: false
+  // Create reusable transporter object using Gmail SMTP
+  const createTransporter = () => {
+    // Check if nodemailer is properly imported
+    if (!nodemailer || typeof nodemailer.createTransporter !== 'function') {
+      console.error('Nodemailer not properly imported');
+      const nm = require('nodemailer');
+      return nm.createTransporter({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: {
+          user: process.env.EMAIL_USER || 'pluginappgeo@gmail.com',
+          pass: process.env.EMAIL_PASS || ''
+        },
+        tls: {
+          ciphers: 'SSLv3',
+          rejectUnauthorized: false
+        }
+      });
     }
-  });
-};
+
+    return nodemailer.createTransporter({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER || 'pluginappgeo@gmail.com',
+        pass: process.env.EMAIL_PASS || ''
+      },
+      tls: {
+        ciphers: 'SSLv3',
+        rejectUnauthorized: false
+      }
+    });
+  };
 
 // Email templates
 const emailTemplates = {
