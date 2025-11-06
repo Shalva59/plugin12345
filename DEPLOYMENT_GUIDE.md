@@ -132,7 +132,7 @@ module.exports = {
       name: 'plugin-frontend',
       script: 'npm',
       args: 'start',
-      cwd: '/var/www/plugin.valueflight.dev',
+      cwd: '/var/www/plugin.valueflight.dev/plugin12345',
       env: {
         NODE_ENV: 'production',
         PORT: 3001
@@ -144,7 +144,7 @@ module.exports = {
     {
       name: 'plugin-backend',
       script: './server/index.js',
-      cwd: '/var/www/plugin.valueflight.dev',
+      cwd: '/var/www/plugin.valueflight.dev/plugin12345',
       env: {
         NODE_ENV: 'production',
         PORT: 5000

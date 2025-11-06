@@ -2,11 +2,17 @@ const nodemailer = require('nodemailer');
 
 // Create reusable transporter object using Gmail SMTP
 const createTransporter = () => {
-  return nodemailer.createTransport({
-    service: 'gmail',
+  return nodemailer.createTransporter({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // false for port 587, true for 465
     auth: {
       user: process.env.EMAIL_USER || 'pluginappgeo@gmail.com',
-      pass: process.env.EMAIL_PASS || '' // App password
+      pass: process.env.EMAIL_PASS || ''
+    },
+    tls: {
+      ciphers: 'SSLv3',
+      rejectUnauthorized: false
     }
   });
 };
