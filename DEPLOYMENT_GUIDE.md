@@ -108,8 +108,8 @@ JWT_SECRET=your-super-secret-production-key-change-this-now
 JWT_EXPIRE=7d
 
 # Email Configuration (Gmail SMTP)
-EMAIL_USER=pluginappgeo@gmail.com
-EMAIL_PASS=ikoqktmilswspeiy
+EMAIL_USER=mail
+EMAIL_PASS=pass
 ```
 
 Generate a secure JWT secret:
