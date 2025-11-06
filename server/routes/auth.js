@@ -377,6 +377,98 @@ router.put('/update-password', protect, validatePasswordUpdate, checkValidation,
   }
 });
 
+// @desc    Update user profile
+// @route   PUT /api/auth/update-profile
+// @access  Private
+router.put('/update-profile', protect, async (req, res) => {
+  try {
+    const { name, email } = req.body;
+
+    // Validation
+    if (!name || !email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name and email are required'
+      });
+    }
+
+    // Check if email is being changed
+    const emailChanged = req.user.email !== email.toLowerCase();
+
+    // If email is changing, check if new email is already taken
+    if (emailChanged) {
+      const existingUser = await User.findOne({
+        email: email.toLowerCase(),
+        _id: { $ne: req.user._id }
+      });
+
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email address is already in use'
+        });
+      }
+    }
+
+    // Update user
+    const user = await User.findById(req.user._id);
+    user.name = name;
+
+    // If email changed, require re-verification
+    if (emailChanged) {
+      user.email = email.toLowerCase();
+      user.isEmailVerified = false;
+
+      // Generate new verification token
+      const verificationToken = user.generateEmailVerificationToken();
+      await user.save();
+
+      // Send verification email
+      const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3001'}/verify-email?token=${verificationToken}`;
+      await sendEmail(
+        user.email,
+        emailTemplates.verifyEmail(user.name, verificationUrl)
+      );
+
+      return res.json({
+        success: true,
+        message: 'Profile updated. Please check your email to verify your new email address.',
+        requiresVerification: true,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          isEmailVerified: user.isEmailVerified,
+          createdAt: user.createdAt
+        }
+      });
+    } else {
+      await user.save();
+
+      return res.json({
+        success: true,
+        message: 'Profile updated successfully',
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          isEmailVerified: user.isEmailVerified,
+          createdAt: user.createdAt
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Profile update failed',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // @desc    Logout user
 // @route   POST /api/auth/logout
 // @access  Private

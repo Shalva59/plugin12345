@@ -1,0 +1,261 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useAuth } from "../../../lib/auth-context"
+import { Card } from "../components/ui/card"
+import { Button } from "../components/ui/button"
+import { Input } from "../components/ui/input"
+import { Label } from "../components/ui/label"
+import { ArrowLeft, User, Mail, Save, Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import Link from "next/link"
+
+export default function SettingsPage() {
+  const { user, isAuthenticated, loading: authLoading, checkAuth } = useAuth()
+  const router = useRouter()
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: ""
+  })
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState({ type: "", text: "" })
+
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push("/login")
+    }
+  }, [authLoading, isAuthenticated, router])
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        email: user.email || ""
+      })
+    }
+  }, [user])
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setMessage({ type: "", text: "" })
+    setLoading(true)
+
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/update-profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setMessage({ type: "success", text: "Profile updated successfully!" })
+        // Refresh user data
+        await checkAuth()
+      } else {
+        setMessage({ type: "error", text: data.message || "Failed to update profile" })
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: "An error occurred. Please try again." })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-cyan-500"></div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated || !user) {
+    return null
+  }
+
+  return (
+    <div className="min-h-screen bg-black pt-24">
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 w-[600px] h-[600px] bg-cyan-500/10 top-1/4 left-1/4 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute inset-0 w-[500px] h-[500px] bg-purple-500/10 bottom-1/4 right-1/4 rounded-full blur-3xl animate-pulse" />
+
+        <div className="container mx-auto px-4 relative z-10 py-12">
+          <div className="max-w-2xl mx-auto">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors mb-8 group"
+            >
+              <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+              Back to Dashboard
+            </Link>
+
+            <Card className="bg-gray-900/50 backdrop-blur-sm border-cyan-500/20 p-8">
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-white mb-2">Account Settings</h1>
+                <p className="text-gray-400">Update your account information</p>
+              </div>
+
+              {message.text && (
+                <div className={`mb-6 p-4 rounded-lg flex items-start gap-3 ${
+                  message.type === "success"
+                    ? "bg-emerald-500/10 border border-emerald-500/30"
+                    : "bg-red-500/10 border border-red-500/30"
+                }`}>
+                  {message.type === "success" ? (
+                    <CheckCircle className="text-emerald-500 mt-0.5" size={20} />
+                  ) : (
+                    <AlertCircle className="text-red-500 mt-0.5" size={20} />
+                  )}
+                  <p className={message.type === "success" ? "text-emerald-400" : "text-red-400"}>
+                    {message.text}
+                  </p>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-white">
+                    Full Name
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <Input
+                      id="name"
+                      name="name"
+                      type="text"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="pl-10 bg-gray-800/50 border-cyan-500/30 focus:border-cyan-500/60 text-white placeholder:text-gray-500"
+                      placeholder="Enter your name"
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-white">
+                    Email Address
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="pl-10 bg-gray-800/50 border-cyan-500/30 focus:border-cyan-500/60 text-white placeholder:text-gray-500"
+                      placeholder="Enter your email"
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Note: Changing your email will require re-verification
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="p-4 bg-gray-800/30 rounded-lg">
+                    <h3 className="text-sm font-medium text-gray-400 mb-2">Account Status</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-300">Email Verified</span>
+                        <span className={`text-sm ${user.isEmailVerified ? 'text-emerald-400' : 'text-yellow-400'}`}>
+                          {user.isEmailVerified ? 'Yes' : 'No'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-300">Account Type</span>
+                        <span className="text-sm text-cyan-400 capitalize">{user.role || 'User'}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-300">Member Since</span>
+                        <span className="text-sm text-gray-400">
+                          {new Date(user.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <Button
+                    type="submit"
+                    className="flex-1 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="animate-spin mr-2" size={20} />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2" size={20} />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                    onClick={() => router.push("/dashboard")}
+                    disabled={loading}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+
+              <div className="mt-8 pt-6 border-t border-gray-700">
+                <h3 className="text-lg font-semibold text-white mb-4">Security</h3>
+                <div className="space-y-3">
+                  <Link href="/change-password">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                    >
+                      Change Password
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start border-red-500/30 text-red-400 hover:bg-red-500/10"
+                    onClick={() => {
+                      if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+                        // Handle account deletion
+                        console.log("Delete account")
+                      }
+                    }}
+                  >
+                    Delete Account
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
