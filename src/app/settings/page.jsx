@@ -7,11 +7,12 @@ import { Card } from "../components/ui/card"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
-import { ArrowLeft, User, Mail, Save, Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import { ArrowLeft, User, Mail, Save, Loader2, CheckCircle, AlertCircle, Lock, Trash2 } from "lucide-react"
 import Link from "next/link"
+import ConfirmationModal from "../components/ui/confirmation-modal"
 
 export default function SettingsPage() {
-  const { user, isAuthenticated, loading: authLoading, checkAuth } = useAuth()
+  const { user, isAuthenticated, loading: authLoading, checkAuth, logout } = useAuth()
   const router = useRouter()
 
   const [formData, setFormData] = useState({
@@ -20,6 +21,8 @@ export default function SettingsPage() {
   })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState({ type: "", text: "" })
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -75,6 +78,35 @@ export default function SettingsPage() {
       setMessage({ type: "error", text: "An error occurred. Please try again." })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true)
+
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/delete-account`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        // Logout and redirect
+        logout()
+      } else {
+        setMessage({ type: "error", text: data.message || "Failed to delete account" })
+        setShowDeleteModal(false)
+      }
+    } catch (error) {
+      setMessage({ type: "error", text: "An error occurred. Please try again." })
+      setShowDeleteModal(false)
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -229,30 +261,43 @@ export default function SettingsPage() {
 
               <div className="mt-8 pt-6 border-t border-gray-700">
                 <h3 className="text-lg font-semibold text-white mb-4">Security</h3>
-                <div className="space-y-3">
-                  <Link href="/change-password">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Link href="/change-password" className="w-full">
                     <Button
                       variant="outline"
-                      className="w-full justify-start border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                      className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/50 transition-all group"
                     >
+                      <Lock className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
                       Change Password
                     </Button>
                   </Link>
                   <Button
                     variant="outline"
-                    className="w-full justify-start border-red-500/30 text-red-400 hover:bg-red-500/10"
-                    onClick={() => {
-                      if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-                        // Handle account deletion
-                        console.log("Delete account")
-                      }
-                    }}
+                    className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-all group"
+                    onClick={() => setShowDeleteModal(true)}
                   >
+                    <Trash2 className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
                     Delete Account
                   </Button>
                 </div>
+                <p className="text-sm text-gray-500 mt-3">
+                  Note: Account deletion is permanent and cannot be undone.
+                </p>
               </div>
             </Card>
+
+            {/* Delete Account Confirmation Modal */}
+            <ConfirmationModal
+              isOpen={showDeleteModal}
+              onClose={() => setShowDeleteModal(false)}
+              onConfirm={handleDeleteAccount}
+              title="Delete Account"
+              message="Are you absolutely sure you want to delete your account? This action is permanent and cannot be undone. All your data will be permanently removed from our servers."
+              confirmText="Delete My Account"
+              cancelText="Cancel"
+              type="danger"
+              loading={deleteLoading}
+            />
           </div>
         </div>
       </section>

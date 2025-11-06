@@ -469,6 +469,39 @@ router.put('/update-profile', protect, async (req, res) => {
   }
 });
 
+// @desc    Delete user account
+// @route   DELETE /api/auth/delete-account
+// @access  Private
+router.delete('/delete-account', protect, async (req, res) => {
+  try {
+    // Optional: You might want to require password confirmation
+    // const { password } = req.body;
+    // const user = await User.findById(req.user._id).select('+password');
+    // const isPasswordValid = await user.comparePassword(password);
+    // if (!isPasswordValid) {
+    //   return res.status(401).json({ success: false, message: 'Invalid password' });
+    // }
+
+    // Delete the user
+    await User.findByIdAndDelete(req.user._id);
+
+    // Clear the cookie
+    res.clearCookie('token');
+
+    res.json({
+      success: true,
+      message: 'Account deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete account error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete account',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // @desc    Logout user
 // @route   POST /api/auth/logout
 // @access  Private
