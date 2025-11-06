@@ -197,7 +197,9 @@ router.post('/login', validateLogin, checkValidation, async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        isEmailVerified: user.isEmailVerified,
+        createdAt: user.createdAt
       }
     });
   } catch (error) {
