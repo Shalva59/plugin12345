@@ -2,13 +2,23 @@
 
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { Menu, X } from "lucide-react"
+import { Menu, X, User, LogOut, Settings } from "lucide-react"
 import { Button } from "../components/ui/button"
 import { useLanguage } from "../../../lib/language-context"
+import { useAuth } from "../../../lib/auth-context"
 import LanguageSwitcher from "./language-switcher"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu"
 
 export default function Navigation() {
   const { t } = useLanguage()
+  const { user, logout, isAuthenticated, loading } = useAuth()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
@@ -52,14 +62,56 @@ export default function Navigation() {
               </Link>
             ))}
             <LanguageSwitcher />
-            <Link href="/login">
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-cyan-500/80 to-emerald-500/80 hover:from-cyan-500 hover:to-emerald-500 text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105 transition-all duration-300"
-              >
-                {t.nav.login}
-              </Button>
-            </Link>
+            {!loading && (
+              <>
+                {isAuthenticated ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="sm"
+                        className="bg-gradient-to-r from-cyan-500/80 to-emerald-500/80 hover:from-cyan-500 hover:to-emerald-500 text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105 transition-all duration-300"
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        {user?.name || user?.email}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56 bg-gray-900 border-cyan-500/20">
+                      <DropdownMenuLabel className="text-gray-300">My Account</DropdownMenuLabel>
+                      <DropdownMenuSeparator className="bg-cyan-500/20" />
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard" className="text-gray-300 hover:text-cyan-400 cursor-pointer">
+                          <User className="mr-2 h-4 w-4" />
+                          Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/settings" className="text-gray-300 hover:text-cyan-400 cursor-pointer">
+                          <Settings className="mr-2 h-4 w-4" />
+                          Settings
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-cyan-500/20" />
+                      <DropdownMenuItem
+                        onClick={logout}
+                        className="text-red-400 hover:text-red-300 cursor-pointer"
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Link href="/login">
+                    <Button
+                      size="sm"
+                      className="bg-gradient-to-r from-cyan-500/80 to-emerald-500/80 hover:from-cyan-500 hover:to-emerald-500 text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105 transition-all duration-300"
+                    >
+                      {t.nav.login}
+                    </Button>
+                  </Link>
+                )}
+              </>
+            )}
           </div>
 
           <button className="md:hidden text-white" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>

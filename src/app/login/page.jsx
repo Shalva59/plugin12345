@@ -1,19 +1,20 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { useLanguage } from "../../../lib/language-context"
-import { authAPI } from "../../../lib/api"
+import { useAuth } from "../../../lib/auth-context"
 // import Navigation from "@/components/navigation"
 import { Mail, Lock, ArrowLeft, AlertCircle, Loader2 } from "lucide-react"
 
 export default function LoginPage() {
   const { t } = useLanguage()
   const router = useRouter()
+  const { login, isAuthenticated } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
@@ -21,33 +22,38 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [requiresVerification, setRequiresVerification] = useState(false)
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard")
+    }
+  }, [isAuthenticated, router])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError("")
     setLoading(true)
     setRequiresVerification(false)
 
-    try {
-      const response = await authAPI.login({
-        email,
-        password,
-        rememberMe
-      })
+    const result = await login({
+      email,
+      password,
+      rememberMe
+    })
 
-      if (response.success) {
-        // Redirect to dashboard or home page
-        router.push("/")
-      }
-    } catch (err) {
-      setError(err.message || "Login failed. Please try again.")
+    if (result.success) {
+      // Redirect to dashboard
+      router.push("/dashboard")
+    } else {
+      setError(result.message || "Login failed. Please try again.")
 
       // Check if email verification is required
-      if (err.message && err.message.includes("verify your email")) {
+      if (result.message && result.message.includes("verify your email")) {
         setRequiresVerification(true)
       }
-    } finally {
-      setLoading(false)
     }
+
+    setLoading(false)
   }
 
   const handleResendVerification = async () => {
@@ -55,6 +61,7 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
+      const { authAPI } = await import("../../../lib/api")
       await authAPI.resendVerification(email)
       setError("")
       alert("Verification email sent! Please check your inbox.")
