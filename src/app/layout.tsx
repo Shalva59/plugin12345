@@ -10,7 +10,7 @@ import { AuthProvider } from "../../lib/auth-context";
 import Script from "next/script"; // ✅ დამატებულია Tawk.to-სთვის
 
 export const metadata: Metadata = {
-  title: "v0 App",
+  title: "Plug-IN",
   description: "Created with v0",
   generator: "v0.app",
 };
