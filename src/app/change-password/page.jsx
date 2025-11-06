@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "../../../lib/auth-context"
+import { useLanguage } from "../../../lib/language-context"
 import { Card } from "../components/ui/card"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
@@ -13,6 +14,7 @@ import Link from "next/link"
 export default function ChangePasswordPage() {
   const { user, isAuthenticated, loading: authLoading } = useAuth()
   const router = useRouter()
+  const { t } = useLanguage()
 
   const [formData, setFormData] = useState({
     currentPassword: "",
@@ -52,25 +54,25 @@ export default function ChangePasswordPage() {
     const newErrors = {}
 
     if (!formData.currentPassword) {
-      newErrors.currentPassword = "Current password is required"
+      newErrors.currentPassword = t.changePassword.currentPasswordRequired
     }
 
     if (!formData.newPassword) {
-      newErrors.newPassword = "New password is required"
+      newErrors.newPassword = t.changePassword.newPasswordRequired
     } else if (formData.newPassword.length < 6) {
-      newErrors.newPassword = "Password must be at least 6 characters"
+      newErrors.newPassword = t.changePassword.passwordTooShort
     } else if (!/(?=.*[A-Za-z])(?=.*\d)/.test(formData.newPassword)) {
-      newErrors.newPassword = "Password must contain at least one letter and one number"
+      newErrors.newPassword = t.changePassword.passwordRequiresLetterNumber
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your new password"
+      newErrors.confirmPassword = t.changePassword.confirmPasswordRequired
     } else if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match"
+      newErrors.confirmPassword = t.changePassword.passwordsDoNotMatch
     }
 
     if (formData.currentPassword && formData.newPassword && formData.currentPassword === formData.newPassword) {
-      newErrors.newPassword = "New password must be different from current password"
+      newErrors.newPassword = t.changePassword.newPasswordMustDiffer
     }
 
     setErrors(newErrors)
@@ -105,7 +107,7 @@ export default function ChangePasswordPage() {
       const data = await response.json()
 
       if (response.ok && data.success) {
-        setMessage({ type: "success", text: "Password changed successfully!" })
+        setMessage({ type: "success", text: t.changePassword.passwordChanged })
         // Clear form
         setFormData({
           currentPassword: "",
@@ -121,10 +123,10 @@ export default function ChangePasswordPage() {
           router.push("/dashboard")
         }, 2000)
       } else {
-        setMessage({ type: "error", text: data.message || "Failed to change password" })
+        setMessage({ type: "error", text: data.message || t.changePassword.failedToChange })
       }
     } catch (error) {
-      setMessage({ type: "error", text: "An error occurred. Please try again." })
+      setMessage({ type: "error", text: t.changePassword.errorOccurred })
     } finally {
       setLoading(false)
     }
@@ -162,13 +164,13 @@ export default function ChangePasswordPage() {
               className="inline-flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors mb-8 group"
             >
               <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-              Back to Dashboard
+              {t.changePassword.backToDashboard}
             </Link>
 
             <Card className="bg-gray-900/50 backdrop-blur-sm border-purple-500/20 p-8">
               <div className="mb-8">
-                <h1 className="text-3xl font-bold text-white mb-2">Change Password</h1>
-                <p className="text-gray-400">Update your account password</p>
+                <h1 className="text-3xl font-bold text-white mb-2">{t.changePassword.title}</h1>
+                <p className="text-gray-400">{t.changePassword.subtitle}</p>
               </div>
 
               {message.text && (
@@ -191,7 +193,7 @@ export default function ChangePasswordPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="currentPassword" className="text-white">
-                    Current Password
+                    {t.changePassword.currentPassword}
                   </Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -204,7 +206,7 @@ export default function ChangePasswordPage() {
                       className={`pl-10 pr-10 bg-gray-800/50 border-purple-500/30 focus:border-purple-500/60 text-white placeholder:text-gray-500 ${
                         errors.currentPassword ? 'border-red-500/50' : ''
                       }`}
-                      placeholder="Enter current password"
+                      placeholder={t.changePassword.enterCurrentPassword}
                       disabled={loading}
                     />
                     <button
@@ -222,7 +224,7 @@ export default function ChangePasswordPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="newPassword" className="text-white">
-                    New Password
+                    {t.changePassword.newPassword}
                   </Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -235,7 +237,7 @@ export default function ChangePasswordPage() {
                       className={`pl-10 pr-10 bg-gray-800/50 border-purple-500/30 focus:border-purple-500/60 text-white placeholder:text-gray-500 ${
                         errors.newPassword ? 'border-red-500/50' : ''
                       }`}
-                      placeholder="Enter new password"
+                      placeholder={t.changePassword.enterNewPassword}
                       disabled={loading}
                     />
                     <button
@@ -250,13 +252,13 @@ export default function ChangePasswordPage() {
                     <p className="text-red-400 text-sm">{errors.newPassword}</p>
                   )}
                   <p className="text-sm text-gray-500">
-                    Password must be at least 6 characters and contain both letters and numbers
+                    {t.changePassword.passwordRequirements}
                   </p>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword" className="text-white">
-                    Confirm New Password
+                    {t.changePassword.confirmNewPassword}
                   </Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -269,7 +271,7 @@ export default function ChangePasswordPage() {
                       className={`pl-10 pr-10 bg-gray-800/50 border-purple-500/30 focus:border-purple-500/60 text-white placeholder:text-gray-500 ${
                         errors.confirmPassword ? 'border-red-500/50' : ''
                       }`}
-                      placeholder="Confirm new password"
+                      placeholder={t.changePassword.confirmNewPasswordPlaceholder}
                       disabled={loading}
                     />
                     <button
@@ -287,12 +289,12 @@ export default function ChangePasswordPage() {
 
                 <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
                   <p className="text-yellow-400 text-sm">
-                    <strong>Security Tips:</strong>
+                    <strong>{t.changePassword.securityTips}</strong>
                   </p>
                   <ul className="text-yellow-400/80 text-sm mt-2 space-y-1 list-disc list-inside">
-                    <li>Use a unique password that you don't use elsewhere</li>
-                    <li>Consider using a password manager</li>
-                    <li>Enable two-factor authentication when available</li>
+                    <li>{t.changePassword.tip1}</li>
+                    <li>{t.changePassword.tip2}</li>
+                    <li>{t.changePassword.tip3}</li>
                   </ul>
                 </div>
 
@@ -305,12 +307,12 @@ export default function ChangePasswordPage() {
                     {loading ? (
                       <>
                         <Loader2 className="animate-spin mr-2" size={20} />
-                        Changing Password...
+                        {t.changePassword.changingPassword}
                       </>
                     ) : (
                       <>
                         <Save className="mr-2" size={20} />
-                        Change Password
+                        {t.changePassword.changePasswordButton}
                       </>
                     )}
                   </Button>
@@ -321,7 +323,7 @@ export default function ChangePasswordPage() {
                     onClick={() => router.push("/dashboard")}
                     disabled={loading}
                   >
-                    Cancel
+                    {t.changePassword.cancel}
                   </Button>
                 </div>
               </form>
@@ -331,7 +333,7 @@ export default function ChangePasswordPage() {
                   href="/forgot-password"
                   className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
                 >
-                  Forgot your current password?
+                  {t.changePassword.forgotCurrentPassword}
                 </Link>
               </div>
             </Card>

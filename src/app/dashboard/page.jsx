@@ -3,12 +3,14 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "../../../lib/auth-context"
+import { useLanguage } from "../../../lib/language-context"
 import { Card } from "../components/ui/card"
 import { Button } from "../components/ui/button"
 import { User, Mail, Calendar, Shield, LogOut } from "lucide-react"
 
 export default function DashboardPage() {
   const { user, isAuthenticated, loading, logout } = useAuth()
+  const { t } = useLanguage()
   const router = useRouter()
 
   useEffect(() => {
@@ -38,8 +40,8 @@ export default function DashboardPage() {
         <div className="container mx-auto px-4 relative z-10 py-12">
           <div className="max-w-4xl mx-auto">
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-white mb-2">Welcome back, {user.name}!</h1>
-              <p className="text-gray-400">Manage your account and view your information</p>
+              <h1 className="text-4xl font-bold text-white mb-2">{t.dashboard.welcomeBack}, {user.name}!</h1>
+              <p className="text-gray-400">{t.dashboard.manageAccount}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -49,8 +51,8 @@ export default function DashboardPage() {
                     <User className="w-6 h-6 text-cyan-500" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white mb-1">Profile Information</h3>
-                    <p className="text-gray-400 text-sm mb-4">Your account details</p>
+                    <h3 className="text-lg font-semibold text-white mb-1">{t.dashboard.profileInfo}</h3>
+                    <p className="text-gray-400 text-sm mb-4">{t.dashboard.accountDetails}</p>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <User className="w-4 h-4 text-gray-500" />
@@ -71,19 +73,19 @@ export default function DashboardPage() {
                     <Shield className="w-6 h-6 text-emerald-500" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white mb-1">Account Status</h3>
-                    <p className="text-gray-400 text-sm mb-4">Security and verification</p>
+                    <h3 className="text-lg font-semibold text-white mb-1">{t.dashboard.accountStatus}</h3>
+                    <p className="text-gray-400 text-sm mb-4">{t.dashboard.securityVerification}</p>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full ${user.isEmailVerified ? 'bg-emerald-500' : 'bg-yellow-500'}`} />
                         <span className="text-gray-300">
-                          Email {user.isEmailVerified ? 'Verified' : 'Not Verified'}
+                          {user.isEmailVerified ? t.dashboard.emailVerified : t.dashboard.emailNotVerified}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-gray-500" />
                         <span className="text-gray-300">
-                          Joined {new Date(user.createdAt).toLocaleDateString()}
+                          {t.dashboard.joined} {new Date(user.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
@@ -97,14 +99,14 @@ export default function DashboardPage() {
                 className="bg-gradient-to-r from-cyan-500/80 to-emerald-500/80 hover:from-cyan-500 hover:to-emerald-500 text-white"
                 onClick={() => router.push("/settings")}
               >
-                Account Settings
+                {t.dashboard.accountSettings}
               </Button>
               <Button
                 variant="outline"
                 className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
                 onClick={() => router.push("/change-password")}
               >
-                Change Password
+                {t.dashboard.changePassword}
               </Button>
               <Button
                 variant="outline"
@@ -112,19 +114,19 @@ export default function DashboardPage() {
                 onClick={logout}
               >
                 <LogOut className="w-4 h-4 mr-2" />
-                Logout
+                {t.dashboard.logout}
               </Button>
             </div>
 
             {user.role === 'admin' && (
               <Card className="bg-gray-900/50 backdrop-blur-sm border-purple-500/20 p-6 mt-8">
-                <h3 className="text-lg font-semibold text-white mb-4">Admin Panel</h3>
-                <p className="text-gray-400 mb-4">You have administrator privileges</p>
+                <h3 className="text-lg font-semibold text-white mb-4">{t.dashboard.adminPanel}</h3>
+                <p className="text-gray-400 mb-4">{t.dashboard.adminPrivileges}</p>
                 <Button
                   className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white"
                   onClick={() => router.push("/admin")}
                 >
-                  Go to Admin Dashboard
+                  {t.dashboard.goToAdminDashboard}
                 </Button>
               </Card>
             )}

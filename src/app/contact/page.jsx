@@ -105,7 +105,7 @@ export default function ContactPage() {
                     onClick={() => setError("")}
                     className="mt-4 bg-red-500 hover:bg-red-600"
                   >
-                    Try Again
+                    {t.contact.tryAgain}
                   </Button>
                 </div>
               ) : (
@@ -181,7 +181,7 @@ export default function ContactPage() {
                     disabled={loading}
                     className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-6 text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? "Sending..." : t.contact.sendButton}
+                    {loading ? t.contact.sending : t.contact.sendButton}
                   </Button>
                 </form>
               )}

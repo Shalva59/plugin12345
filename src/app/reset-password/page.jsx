@@ -7,11 +7,13 @@ import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { authAPI } from "../../../lib/api"
+import { useLanguage } from "../../../lib/language-context"
 import { Lock, ArrowLeft, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { t } = useLanguage()
   const token = searchParams.get("token")
 
   const [formData, setFormData] = useState({
@@ -34,17 +36,17 @@ function ResetPasswordContent() {
     setError("")
 
     if (!token) {
-      setError("Invalid reset link. Please request a new password reset.")
+      setError(t.resetPassword.invalidToken)
       return
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match")
+      setError(t.resetPassword.passwordsDoNotMatch)
       return
     }
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long")
+      setError(t.resetPassword.passwordTooShort)
       return
     }
 
@@ -64,7 +66,7 @@ function ResetPasswordContent() {
         }, 3000)
       }
     } catch (err) {
-      setError(err.message || "Failed to reset password. Please try again.")
+      setError(err.message || t.resetPassword.failedToReset)
     } finally {
       setLoading(false)
     }
@@ -83,22 +85,22 @@ function ResetPasswordContent() {
               className="inline-flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors mb-8 group"
             >
               <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-              Back to Login
+              {t.resetPassword.backToLogin}
             </Link>
 
             <div className="bg-gray-900/50 backdrop-blur-sm border border-purple-500/20 p-8 md:p-10 rounded-3xl">
               {success ? (
                 <div className="text-center py-8">
                   <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
-                  <h2 className="text-2xl font-bold text-white mb-2">Password Reset Successful!</h2>
-                  <p className="text-gray-400 mb-4">Your password has been reset successfully.</p>
-                  <p className="text-sm text-gray-500">Redirecting to login page...</p>
+                  <h2 className="text-2xl font-bold text-white mb-2">{t.resetPassword.successTitle}</h2>
+                  <p className="text-gray-400 mb-4">{t.resetPassword.successMessage}</p>
+                  <p className="text-sm text-gray-500">{t.resetPassword.redirectingToLogin}</p>
                 </div>
               ) : (
                 <>
                   <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold mb-2 text-white">Reset Password</h1>
-                    <p className="text-gray-400">Enter your new password below</p>
+                    <h1 className="text-4xl font-bold mb-2 text-white">{t.resetPassword.title}</h1>
+                    <p className="text-gray-400">{t.resetPassword.subtitle}</p>
                   </div>
 
                   {error && (
@@ -110,14 +112,14 @@ function ResetPasswordContent() {
 
                   {!token && (
                     <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                      <p className="text-yellow-400">Invalid or missing reset token. Please request a new password reset.</p>
+                      <p className="text-yellow-400">{t.resetPassword.invalidResetToken}</p>
                     </div>
                   )}
 
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
                       <Label htmlFor="password" className="text-white">
-                        New Password
+                        {t.resetPassword.newPassword}
                       </Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -125,7 +127,7 @@ function ResetPasswordContent() {
                           id="password"
                           name="password"
                           type="password"
-                          placeholder="Enter new password"
+                          placeholder={t.resetPassword.enterNewPassword}
                           value={formData.password}
                           onChange={handleChange}
                           className="pl-10 bg-gray-800/50 border-purple-500/30 focus:border-purple-500/60 text-white placeholder:text-gray-500"
@@ -138,7 +140,7 @@ function ResetPasswordContent() {
 
                     <div className="space-y-2">
                       <Label htmlFor="confirmPassword" className="text-white">
-                        Confirm New Password
+                        {t.resetPassword.confirmNewPassword}
                       </Label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -146,7 +148,7 @@ function ResetPasswordContent() {
                           id="confirmPassword"
                           name="confirmPassword"
                           type="password"
-                          placeholder="Confirm new password"
+                          placeholder={t.resetPassword.confirmNewPasswordPlaceholder}
                           value={formData.confirmPassword}
                           onChange={handleChange}
                           className="pl-10 bg-gray-800/50 border-purple-500/30 focus:border-purple-500/60 text-white placeholder:text-gray-500"
@@ -165,18 +167,18 @@ function ResetPasswordContent() {
                       {loading ? (
                         <>
                           <Loader2 className="animate-spin mr-2" size={20} />
-                          Resetting...
+                          {t.resetPassword.resetting}
                         </>
                       ) : (
-                        "Reset Password"
+                        t.resetPassword.resetButton
                       )}
                     </Button>
                   </form>
 
                   <div className="mt-6 text-center text-sm text-gray-400">
-                    Remember your password?{" "}
+                    {t.resetPassword.rememberedPassword}{" "}
                     <Link href="/login" className="text-purple-400 hover:text-purple-300 transition-colors font-medium">
-                      Back to Login
+                      {t.resetPassword.backToLogin}
                     </Link>
                   </div>
                 </>

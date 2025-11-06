@@ -76,18 +76,18 @@ export default function Navigation() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56 bg-gray-900 border-cyan-500/20">
-                      <DropdownMenuLabel className="text-gray-300">My Account</DropdownMenuLabel>
+                      <DropdownMenuLabel className="text-gray-300">{t.navigation.myAccount}</DropdownMenuLabel>
                       <DropdownMenuSeparator className="bg-cyan-500/20" />
                       <DropdownMenuItem asChild>
                         <Link href="/dashboard" className="text-gray-300 hover:text-cyan-400 cursor-pointer">
                           <User className="mr-2 h-4 w-4" />
-                          Dashboard
+                          {t.navigation.dashboard}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href="/settings" className="text-gray-300 hover:text-cyan-400 cursor-pointer">
                           <Settings className="mr-2 h-4 w-4" />
-                          Settings
+                          {t.navigation.settings}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="bg-cyan-500/20" />
@@ -96,7 +96,7 @@ export default function Navigation() {
                         className="text-red-400 hover:text-red-300 cursor-pointer"
                       >
                         <LogOut className="mr-2 h-4 w-4" />
-                        Logout
+                        {t.navigation.logout}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
