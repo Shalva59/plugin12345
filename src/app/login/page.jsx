@@ -1,22 +1,75 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { useLanguage } from "../../../lib/language-context"
+import { useAuth } from "../../../lib/auth-context"
 // import Navigation from "@/components/navigation"
-import { Mail, Lock, ArrowLeft } from "lucide-react"
+import { Mail, Lock, ArrowLeft, AlertCircle, Loader2 } from "lucide-react"
 
 export default function LoginPage() {
   const { t } = useLanguage()
+  const router = useRouter()
+  const { login, isAuthenticated } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [rememberMe, setRememberMe] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [requiresVerification, setRequiresVerification] = useState(false)
 
-  const handleSubmit = (e) => {
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard")
+    }
+  }, [isAuthenticated, router])
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log("Login attempt:", { email, password })
+    setError("")
+    setLoading(true)
+    setRequiresVerification(false)
+
+    const result = await login({
+      email,
+      password,
+      rememberMe
+    })
+
+    if (result.success) {
+      // Redirect to dashboard
+      router.push("/dashboard")
+    } else {
+      setError(result.message || "Login failed. Please try again.")
+
+      // Check if email verification is required
+      if (result.message && result.message.includes("verify your email")) {
+        setRequiresVerification(true)
+      }
+    }
+
+    setLoading(false)
+  }
+
+  const handleResendVerification = async () => {
+    setError("")
+    setLoading(true)
+
+    try {
+      const { authAPI } = await import("../../../lib/api")
+      await authAPI.resendVerification(email)
+      setError("")
+      alert("Verification email sent! Please check your inbox.")
+    } catch (err) {
+      setError(err.message || "Failed to resend verification email.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -46,6 +99,24 @@ export default function LoginPage() {
                 <p className="text-gray-400">{t.login.subtitle}</p>
               </div>
 
+              {error && (
+                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
+                  <AlertCircle className="text-red-500 mt-0.5" size={20} />
+                  <div className="flex-1">
+                    <p className="text-red-400">{error}</p>
+                    {requiresVerification && (
+                      <button
+                        onClick={handleResendVerification}
+                        className="mt-2 text-sm text-cyan-400 hover:text-cyan-300 underline"
+                        disabled={loading}
+                      >
+                        Resend verification email
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-white">
@@ -61,6 +132,7 @@ export default function LoginPage() {
                       onChange={(e) => setEmail(e.target.value)}
                       className="pl-10 bg-gray-800/50 border-cyan-500/30 focus:border-cyan-500/60 text-white placeholder:text-gray-500"
                       required
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -79,13 +151,20 @@ export default function LoginPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       className="pl-10 bg-gray-800/50 border-cyan-500/30 focus:border-cyan-500/60 text-white placeholder:text-gray-500"
                       required
+                      disabled={loading}
                     />
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between text-sm">
                   <label className="flex items-center gap-2 cursor-pointer text-gray-300">
-                    <input type="checkbox" className="rounded border-cyan-500/30" />
+                    <input
+                      type="checkbox"
+                      className="rounded border-cyan-500/30"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      disabled={loading}
+                    />
                     {t.login.rememberMe}
                   </label>
                   <Link href="/forgot-password" className="text-cyan-400 hover:text-cyan-300 transition-colors">
@@ -95,10 +174,18 @@ export default function LoginPage() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white shadow-xl shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-105 transition-all duration-300"
+                  className="w-full bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white shadow-xl shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                   size="lg"
+                  disabled={loading}
                 >
-                  {t.login.loginButton}
+                  {loading ? (
+                    <>
+                      <Loader2 className="animate-spin mr-2" size={20} />
+                      Logging in...
+                    </>
+                  ) : (
+                    t.login.loginButton
+                  )}
                 </Button>
               </form>
 

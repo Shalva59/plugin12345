@@ -1,24 +1,34 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useState, useEffect } from "react"
-import { Menu, X, ShoppingCart } from "lucide-react"
-import { Button } from "./ui/button"
-import { useLanguage } from "../../../lib/language-context"
-import LanguageSwitcher from "../components/language-switcher"
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { Menu, ShoppingCart, X, User, LogOut, Settings } from "lucide-react";
+import { Button } from "../components/ui/button";
+import { useLanguage } from "../../../lib/language-context";
+import { useAuth } from "../../../lib/auth-context";
+import LanguageSwitcher from "./language-switcher";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 
 export default function Navigation() {
-  const { t } = useLanguage()
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { t } = useLanguage();
+  const { user, logout, isAuthenticated, loading } = useAuth();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks = [
     { href: "/", label: t.nav.home },
@@ -26,17 +36,22 @@ export default function Navigation() {
     { href: "/services", label: t.nav.services },
     { href: "/software", label: t.nav.software },
     { href: "/contact", label: t.nav.contact },
-  ]
+  ];
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 w-full max-w-full transition-all duration-500 ${
-        isScrolled ? "glass-card border-b border-cyan-400/20 shadow-lg shadow-cyan-500/5" : "bg-transparent"
+        isScrolled
+          ? "glass-card border-b border-cyan-400/20 shadow-lg shadow-cyan-500/5"
+          : "bg-transparent"
       }`}
     >
       <div className="container mx-auto px-4 max-w-full">
         <div className="flex items-center justify-between h-20">
-          <Link href="/" className="text-2xl font-bold text-gradient hover:scale-105 transition-transform duration-300">
+          <Link
+            href="/"
+            className="text-2xl font-bold text-gradient hover:scale-105 transition-transform duration-300"
+          >
             PLUG-IN
           </Link>
 
@@ -51,7 +66,7 @@ export default function Navigation() {
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-emerald-400 transition-all duration-300 group-hover:w-full" />
               </Link>
             ))}
-            <LanguageSwitcher />
+
             <Link href="/checkout">
               <Button
                 size="sm"
@@ -61,17 +76,76 @@ export default function Navigation() {
                 <ShoppingCart className="h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/login">
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-cyan-500/80 to-emerald-500/80 hover:from-cyan-500 hover:to-emerald-500 text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105 transition-all duration-300"
-              >
-                {t.nav.login}
-              </Button>
-            </Link>
+
+            <LanguageSwitcher />
+
+            {!loading && (
+              <>
+                {isAuthenticated ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="sm"
+                        className="bg-gradient-to-r from-cyan-500/80 to-emerald-500/80 hover:from-cyan-500 hover:to-emerald-500 text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105 transition-all duration-300"
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        {user?.name || user?.email}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-56 bg-gray-900 border-cyan-500/20"
+                    >
+                      <DropdownMenuLabel className="text-gray-300">
+                        {t.navigation.myAccount}
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator className="bg-cyan-500/20" />
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href="/dashboard"
+                          className="text-gray-300 hover:text-cyan-400 cursor-pointer"
+                        >
+                          <User className="mr-2 h-4 w-4" />
+                          {t.navigation.dashboard}
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href="/settings"
+                          className="text-gray-300 hover:text-cyan-400 cursor-pointer"
+                        >
+                          <Settings className="mr-2 h-4 w-4" />
+                          {t.navigation.settings}
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-cyan-500/20" />
+                      <DropdownMenuItem
+                        onClick={logout}
+                        className="text-red-400 hover:text-red-300 cursor-pointer"
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        {t.navigation.logout}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Link href="/login">
+                    <Button
+                      size="sm"
+                      className="bg-gradient-to-r from-cyan-500/80 to-emerald-500/80 hover:from-cyan-500 hover:to-emerald-500 text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105 transition-all duration-300"
+                    >
+                      {t.nav.login}
+                    </Button>
+                  </Link>
+                )}
+              </>
+            )}
           </div>
 
-          <button className="md:hidden text-white" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          <button
+            className="md:hidden text-white"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -117,5 +191,5 @@ export default function Navigation() {
         )}
       </div>
     </nav>
-  )
+  );
 }

@@ -7,18 +7,30 @@ import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import Navigation from "../components/navigation"
 import { useLanguage } from "../../../lib/language-context"
+import { authAPI } from "../../../lib/api"
 
-import { Mail, ArrowLeft, CheckCircle } from "lucide-react"
+import { Mail, ArrowLeft, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
 
 export default function ForgotPasswordPage() {
   const { t } = useLanguage()
   const [email, setEmail] = useState("")
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log("Password reset request:", { email })
-    setSubmitted(true)
+    setError("")
+    setLoading(true)
+
+    try {
+      await authAPI.forgotPassword(email)
+      setSubmitted(true)
+    } catch (err) {
+      setError(err.message || "Failed to send reset email. Please try again.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -50,6 +62,13 @@ export default function ForgotPasswordPage() {
                     <p className="text-gray-400">{t.forgotPassword.subtitle}</p>
                   </div>
 
+                  {error && (
+                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
+                      <AlertCircle className="text-red-500 mt-0.5" size={20} />
+                      <p className="text-red-400">{error}</p>
+                    </div>
+                  )}
+
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
                       <Label htmlFor="email" className="text-white">
@@ -65,16 +84,25 @@ export default function ForgotPasswordPage() {
                           onChange={(e) => setEmail(e.target.value)}
                           className="pl-10 bg-gray-800/50 border-purple-500/30 focus:border-purple-500/60 text-white placeholder:text-gray-500"
                           required
+                          disabled={loading}
                         />
                       </div>
                     </div>
 
                     <Button
                       type="submit"
-                      className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-400 hover:to-cyan-400 text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300"
+                      className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-400 hover:to-cyan-400 text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                       size="lg"
+                      disabled={loading}
                     >
-                      {t.forgotPassword.resetButton}
+                      {loading ? (
+                        <>
+                          <Loader2 className="animate-spin mr-2" size={20} />
+                          Sending...
+                        </>
+                      ) : (
+                        t.forgotPassword.resetButton
+                      )}
                     </Button>
                   </form>
                 </>

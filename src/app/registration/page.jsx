@@ -2,36 +2,76 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { useLanguage } from "../../../lib/language-context"
+import { authAPI } from "../../../lib/api"
 // import Navigation from "@/components/navigation"
-import { Mail, Lock, User, ArrowLeft } from "lucide-react"
+import { Mail, Lock, User, ArrowLeft, AlertCircle, Loader2, CheckCircle } from "lucide-react"
 
 export default function RegisterPage() {
   const { t } = useLanguage()
+  const router = useRouter()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
+    termsAccepted: false
   })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState(false)
 
   const handleChange = (e) => {
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: value,
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setError("")
+
+    // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      alert(t.register.passwordMismatch)
+      setError(t.register.passwordMismatch || "Passwords do not match")
       return
     }
-    console.log("Registration attempt:", formData)
+
+    // Validate terms accepted
+    if (!formData.termsAccepted) {
+      setError("You must accept the terms and conditions")
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      const response = await authAPI.register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        termsAccepted: formData.termsAccepted
+      })
+
+      if (response.success) {
+        setSuccess(true)
+        // Redirect to login after 3 seconds
+        setTimeout(() => {
+          router.push("/login")
+        }, 3000)
+      }
+    } catch (err) {
+      setError(err.message || "Registration failed. Please try again.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -61,7 +101,23 @@ export default function RegisterPage() {
                 <p className="text-gray-400">{t.register.subtitle}</p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              {success ? (
+                <div className="text-center py-8">
+                  <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold text-white mb-2">Registration Successful!</h2>
+                  <p className="text-gray-400 mb-4">Please check your email to verify your account.</p>
+                  <p className="text-sm text-gray-500">Redirecting to login page...</p>
+                </div>
+              ) : (
+                <>
+                  {error && (
+                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
+                      <AlertCircle className="text-red-500 mt-0.5" size={20} />
+                      <p className="text-red-400">{error}</p>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-white">
                     {t.register.name}
@@ -77,6 +133,7 @@ export default function RegisterPage() {
                       onChange={handleChange}
                       className="pl-10 bg-gray-800/50 border-emerald-500/30 focus:border-emerald-500/60 text-white placeholder:text-gray-500"
                       required
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -96,6 +153,7 @@ export default function RegisterPage() {
                       onChange={handleChange}
                       className="pl-10 bg-gray-800/50 border-emerald-500/30 focus:border-emerald-500/60 text-white placeholder:text-gray-500"
                       required
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -115,6 +173,7 @@ export default function RegisterPage() {
                       onChange={handleChange}
                       className="pl-10 bg-gray-800/50 border-emerald-500/30 focus:border-emerald-500/60 text-white placeholder:text-gray-500"
                       required
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -134,12 +193,21 @@ export default function RegisterPage() {
                       onChange={handleChange}
                       className="pl-10 bg-gray-800/50 border-emerald-500/30 focus:border-emerald-500/60 text-white placeholder:text-gray-500"
                       required
+                      disabled={loading}
                     />
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2 text-sm">
-                  <input type="checkbox" className="mt-1 rounded border-emerald-500/30" required />
+                  <input
+                    type="checkbox"
+                    name="termsAccepted"
+                    className="mt-1 rounded border-emerald-500/30"
+                    checked={formData.termsAccepted}
+                    onChange={handleChange}
+                    required
+                    disabled={loading}
+                  />
                   <label className="text-gray-300">
                     {t.register.agreeToTerms}{" "}
                     <a href="#" className="text-emerald-400 hover:text-emerald-300 transition-colors">
@@ -150,12 +218,22 @@ export default function RegisterPage() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 transition-all duration-300"
+                  className="w-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                   size="lg"
+                  disabled={loading}
                 >
-                  {t.register.registerButton}
+                  {loading ? (
+                    <>
+                      <Loader2 className="animate-spin mr-2" size={20} />
+                      Registering...
+                    </>
+                  ) : (
+                    t.register.registerButton
+                  )}
                 </Button>
               </form>
+              </>
+              )}
 
               <div className="mt-6 text-center text-sm text-gray-400">
                 {t.register.haveAccount}{" "}
