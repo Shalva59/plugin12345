@@ -2,10 +2,10 @@
 
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { Menu, X } from "lucide-react"
-import { Button } from "../components/ui/button"
+import { Menu, X, ShoppingCart } from "lucide-react"
+import { Button } from "./ui/button"
 import { useLanguage } from "../../../lib/language-context"
-import LanguageSwitcher from "./language-switcher"
+import LanguageSwitcher from "../components/language-switcher"
 
 export default function Navigation() {
   const { t } = useLanguage()
@@ -52,6 +52,15 @@ export default function Navigation() {
               </Link>
             ))}
             <LanguageSwitcher />
+            <Link href="/checkout">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-gray-300 hover:text-cyan-400 hover:bg-cyan-400/10 transition-all duration-300"
+              >
+                <ShoppingCart className="h-5 w-5" />
+              </Button>
+            </Link>
             <Link href="/login">
               <Button
                 size="sm"
@@ -83,6 +92,17 @@ export default function Navigation() {
               <div className="px-4">
                 <LanguageSwitcher />
               </div>
+              <Link href="/checkout" className="px-4">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full border-cyan-400/30 text-gray-300 hover:text-cyan-400 hover:bg-cyan-400/10 bg-transparent"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Checkout
+                </Button>
+              </Link>
               <Link href="/login" className="px-4">
                 <Button
                   size="sm"
