@@ -74,7 +74,7 @@ export default function SoftwarePage() {
               return (
                 <div
                   key={category.id}
-                  className={`glass-card border ${category.borderColor} p-8 hover:scale-105 transition-all duration-300 ${category.hoverGlow} hover:shadow-2xl group`}
+                  className={`glass-card border flex flex-col justify-between ${category.borderColor} p-8 hover:scale-105 transition-all duration-300 ${category.hoverGlow} hover:shadow-2xl group`}
                 >
                   <div className="flex items-start gap-4 mb-6">
                     <div
